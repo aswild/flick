@@ -19,7 +19,7 @@ U 1 1 61848F4A
 P 1225 1625
 F 0 "X1" H 875 2425 50  0000 C CNN
 F 1 "USB_C_2.0" H 1075 2225 50  0000 C CNN
-F 2 "Alkenta:USB_C_Receptacle_GCT_USB4105" H 1375 1625 50  0001 C CNN
+F 2 "Wild:USB_C_Receptacle_GCT_USB4105" H 1375 1625 50  0001 C CNN
 F 3 "https://www.usb.org/sites/default/files/documents/usb_type-c.zip" H 1375 1625 50  0001 C CNN
 	1    1225 1625
 	1    0    0    -1  
@@ -223,17 +223,6 @@ F 3 "" H 4325 975 50  0001 C CNN
 	1    4325 975 
 	1    0    0    -1  
 $EndComp
-$Comp
-L Alkenta:AP2112M-3.3 U2
-U 1 1 61838D89
-P 3925 1125
-F 0 "U2" H 3925 1467 50  0000 C CNN
-F 1 "AP2112M-3.3" H 3925 1376 50  0000 C CNN
-F 2 "Package_SO:SO-8_3.9x4.9mm_P1.27mm" H 3925 1450 50  0001 C CNN
-F 3 "https://www.diodes.com/assets/Datasheets/AP2112.pdf" H 3925 1225 50  0001 C CNN
-	1    3925 1125
-	1    0    0    -1  
-$EndComp
 Text Notes 5950 1400 0    50   ~ 0
 VDDIN
 Text Notes 5550 1400 0    50   ~ 0
@@ -400,17 +389,6 @@ Text Notes 900  700  0    79   ~ 0
 USB and Power Supply
 Wire Wire Line
 	2575 1025 3425 1025
-$Comp
-L Device:Crystal_Small Y1
-U 1 1 6199EAC6
-P 1150 3900
-F 0 "Y1" V 1000 3900 50  0000 C CNN
-F 1 "32.768KHz" V 1300 3900 50  0000 C CNN
-F 2 "Crystal:Crystal_SMD_MicroCrystal_CC8V-T1A-2Pin_2.0x1.2mm_HandSoldering" H 1150 3900 50  0001 C CNN
-F 3 "~" H 1150 3900 50  0001 C CNN
-	1    1150 3900
-	0    1    1    0   
-$EndComp
 $Comp
 L power:+3.3V #PWR0111
 U 1 1 619D1514
@@ -584,66 +562,6 @@ Wire Wire Line
 	8350 1575 8200 1575
 Text GLabel 8350 1575 2    50   Input ~ 0
 NRESET
-Wire Wire Line
-	1550 3850 1500 3850
-Wire Wire Line
-	1500 3850 1500 3800
-Wire Wire Line
-	1500 3800 1150 3800
-Wire Wire Line
-	1550 3950 1500 3950
-Wire Wire Line
-	1500 3950 1500 4000
-Wire Wire Line
-	1500 4000 1150 4000
-Wire Wire Line
-	950  3800 1150 3800
-Connection ~ 1150 3800
-Wire Wire Line
-	950  4000 1150 4000
-Connection ~ 1150 4000
-$Comp
-L power:GND #PWR0118
-U 1 1 61913AAC
-P 650 4100
-F 0 "#PWR0118" H 650 3850 50  0001 C CNN
-F 1 "GND" H 655 3927 50  0000 C CNN
-F 2 "" H 650 4100 50  0001 C CNN
-F 3 "" H 650 4100 50  0001 C CNN
-	1    650  4100
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	650  4100 650  4000
-Wire Wire Line
-	650  3800 750  3800
-Wire Wire Line
-	750  4000 650  4000
-Connection ~ 650  4000
-Wire Wire Line
-	650  4000 650  3800
-$Comp
-L Device:C_Small C10
-U 1 1 619BA2DB
-P 850 4000
-F 0 "C10" V 800 3800 50  0000 L CNN
-F 1 "15pF" V 950 3900 50  0000 L CNN
-F 2 "Capacitor_SMD:C_0603_1608Metric_Pad1.08x0.95mm_HandSolder" H 850 4000 50  0001 C CNN
-F 3 "~" H 850 4000 50  0001 C CNN
-	1    850  4000
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:C_Small C9
-U 1 1 619B4189
-P 850 3800
-F 0 "C9" V 900 3650 50  0000 L CNN
-F 1 "15pF" V 750 3700 50  0000 L CNN
-F 2 "Capacitor_SMD:C_0603_1608Metric_Pad1.08x0.95mm_HandSolder" H 850 3800 50  0001 C CNN
-F 3 "~" H 850 3800 50  0001 C CNN
-	1    850  3800
-	0    1    1    0   
-$EndComp
 Text GLabel 1550 6250 0    50   Input ~ 0
 USB_D-
 Text GLabel 1550 6350 0    50   Input ~ 0
@@ -741,7 +659,7 @@ U 1 1 61981953
 P 5845 4075
 F 0 "VR2" H 5775 4029 50  0000 R CNN
 F 1 "10K" H 5775 4120 50  0000 R CNN
-F 2 "Alkenta:Potentiometer_Bourns_PTV09A-1_Single_Vertical" H 5845 4075 50  0001 C CNN
+F 2 "Wild:Potentiometer_Bourns_PTV09A-1_Single_Vertical" H 5845 4075 50  0001 C CNN
 F 3 "~" H 5845 4075 50  0001 C CNN
 	1    5845 4075
 	1    0    0    1   
@@ -767,7 +685,7 @@ U 1 1 61991BD2
 P 4645 4475
 F 0 "VR1" H 4575 4429 50  0000 R CNN
 F 1 "10K" H 4575 4520 50  0000 R CNN
-F 2 "Alkenta:Potentiometer_Bourns_PTV09A-1_Single_Vertical" H 4645 4475 50  0001 C CNN
+F 2 "Wild:Potentiometer_Bourns_PTV09A-1_Single_Vertical" H 4645 4475 50  0001 C CNN
 F 3 "~" H 4645 4475 50  0001 C CNN
 	1    4645 4475
 	1    0    0    1   
@@ -782,17 +700,6 @@ F 2 "Button_Switch_SMD:SW_SPST_PTS645" H 7750 1975 50  0001 C CNN
 F 3 "~" H 7750 1975 50  0001 C CNN
 	1    7750 1775
 	0    -1   -1   0   
-$EndComp
-$Comp
-L Alkenta:SH1106G X2
-U 1 1 61855B25
-P 8250 4325
-F 0 "X2" H 8250 5000 50  0000 C CNN
-F 1 "SH1106G" H 8250 4909 50  0000 C CNN
-F 2 "Alkenta:GCT_FFC2B28-16_1x16-1MP_P0.5mm_Horizontal" H 7950 4575 50  0001 C CNN
-F 3 "" H 7950 4575 50  0001 C CNN
-	1    8250 4325
-	1    0    0    -1  
 $EndComp
 Text GLabel 7800 4125 0    50   Input ~ 0
 OLED_CS
@@ -980,7 +887,7 @@ F 3 "~" H 4950 5850 50  0001 C CNN
 	1    4950 5850
 	1    0    0    -1  
 $EndComp
-Text GLabel 4650 6450 0    50   Input ~ 0
+Text GLabel 4900 5700 0    50   Input ~ 0
 LED_TRIG
 Text GLabel 1550 5450 0    50   Input ~ 0
 OLED_MOSI
@@ -992,17 +899,6 @@ Text GLabel 1550 4650 0    50   Input ~ 0
 OLED_DC
 Text GLabel 1550 4750 0    50   Input ~ 0
 OLED_RESET
-$Comp
-L power:+3.3V #PWR0127
-U 1 1 619CC6B0
-P 4950 5750
-F 0 "#PWR0127" H 4950 5600 50  0001 C CNN
-F 1 "+3.3V" H 4965 5923 50  0000 C CNN
-F 2 "" H 4950 5750 50  0001 C CNN
-F 3 "" H 4950 5750 50  0001 C CNN
-	1    4950 5750
-	1    0    0    -1  
-$EndComp
 $Comp
 L Device:Rotary_Encoder_Switch SW1
 U 1 1 619D190F
@@ -1206,25 +1102,14 @@ NoConn ~ 1550 5850
 NoConn ~ 1550 5950
 NoConn ~ 1550 5150
 $Comp
-L Device:Q_NMOS_GSD Q2
-U 1 1 61A68A78
-P 4850 6450
-F 0 "Q2" H 5054 6496 50  0000 L CNN
-F 1 "Q_NMOS_GSD" H 5054 6405 50  0000 L CNN
-F 2 "Package_TO_SOT_SMD:SOT-23" H 5050 6550 50  0001 C CNN
-F 3 "~" H 4850 6450 50  0001 C CNN
-	1    4850 6450
-	1    0    0    -1  
-$EndComp
-$Comp
 L power:GND #PWR01
 U 1 1 61A7C612
-P 4950 6650
-F 0 "#PWR01" H 4950 6400 50  0001 C CNN
-F 1 "GND" H 4955 6477 50  0000 C CNN
-F 2 "" H 4950 6650 50  0001 C CNN
-F 3 "" H 4950 6650 50  0001 C CNN
-	1    4950 6650
+P 4950 6250
+F 0 "#PWR01" H 4950 6000 50  0001 C CNN
+F 1 "GND" H 4955 6077 50  0000 C CNN
+F 2 "" H 4950 6250 50  0001 C CNN
+F 3 "" H 4950 6250 50  0001 C CNN
+	1    4950 6250
 	1    0    0    -1  
 $EndComp
 Wire Notes Line style solid
@@ -1235,4 +1120,103 @@ Text Label 2750 3500 0    50   ~ 0
 VDDCORE
 Text Notes 9750 3200 0    79   ~ 0
 Mounting Holes
+Wire Wire Line
+	4950 5750 4950 5700
+Wire Wire Line
+	4950 5700 4900 5700
+Text Notes 4850 6150 2    50   ~ 0
+Green\nWP710A10LZGCK\n2mA @ 2.65 Vf
+$Comp
+L Wild:AP7365-33W U2
+U 1 1 61905D50
+P 3925 1125
+F 0 "U2" H 3925 1467 50  0000 C CNN
+F 1 "AP7365-33W" H 3925 1376 50  0000 C CNN
+F 2 "Package_TO_SOT_SMD:SOT-23-5_HandSoldering" H 3925 1450 50  0001 C CNN
+F 3 "https://www.diodes.com/assets/Datasheets/products_inactive_data/AP7365.pdf" H 3925 1225 50  0001 C CNN
+	1    3925 1125
+	1    0    0    -1  
+$EndComp
+$Comp
+L Wild:SH1106G X2
+U 1 1 61855B25
+P 8250 4325
+F 0 "X2" H 8250 5000 50  0000 C CNN
+F 1 "SH1106G" H 8250 4909 50  0000 C CNN
+F 2 "Wild:GCT_FFC2B28-16_1x16-1MP_P0.5mm_Horizontal" H 7950 4575 50  0001 C CNN
+F 3 "" H 7950 4575 50  0001 C CNN
+	1    8250 4325
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:Crystal_Small Y1
+U 1 1 6199EAC6
+P 1275 3900
+F 0 "Y1" V 1125 3900 50  0000 C CNN
+F 1 "32.768KHz" V 1425 3900 50  0000 C CNN
+F 2 "Crystal:Crystal_SMD_MicroCrystal_CC8V-T1A-2Pin_2.0x1.2mm_HandSoldering" H 1275 3900 50  0001 C CNN
+F 3 "~" H 1275 3900 50  0001 C CNN
+	1    1275 3900
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	1075 3800 1275 3800
+Wire Wire Line
+	1075 4000 1275 4000
+$Comp
+L power:GND #PWR0118
+U 1 1 61913AAC
+P 775 4100
+F 0 "#PWR0118" H 775 3850 50  0001 C CNN
+F 1 "GND" H 780 3927 50  0000 C CNN
+F 2 "" H 775 4100 50  0001 C CNN
+F 3 "" H 775 4100 50  0001 C CNN
+	1    775  4100
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	775  4100 775  4000
+Wire Wire Line
+	775  3800 875  3800
+Wire Wire Line
+	875  4000 775  4000
+Connection ~ 775  4000
+Wire Wire Line
+	775  4000 775  3800
+$Comp
+L Device:C_Small C10
+U 1 1 619BA2DB
+P 975 4000
+F 0 "C10" V 925 3800 50  0000 L CNN
+F 1 "15pF" V 1075 3900 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0603_1608Metric_Pad1.08x0.95mm_HandSolder" H 975 4000 50  0001 C CNN
+F 3 "~" H 975 4000 50  0001 C CNN
+	1    975  4000
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:C_Small C9
+U 1 1 619B4189
+P 975 3800
+F 0 "C9" V 1025 3650 50  0000 L CNN
+F 1 "15pF" V 875 3700 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0603_1608Metric_Pad1.08x0.95mm_HandSolder" H 975 3800 50  0001 C CNN
+F 3 "~" H 975 3800 50  0001 C CNN
+	1    975  3800
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	1550 3850 1475 3850
+Wire Wire Line
+	1475 3850 1475 3800
+Wire Wire Line
+	1475 3800 1275 3800
+Connection ~ 1275 3800
+Wire Wire Line
+	1275 4000 1475 4000
+Wire Wire Line
+	1475 4000 1475 3950
+Wire Wire Line
+	1475 3950 1550 3950
+Connection ~ 1275 4000
 $EndSCHEMATC
