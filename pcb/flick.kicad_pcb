@@ -177,7 +177,7 @@
     (add_net USB_D-)
   )
 
-  (module Wild:RotaryEncoder_Bourns_PEC11L-Switch_Vertical_H20mm (layer F.Cu) (tedit 618C99C4) (tstamp 61855925)
+  (module Wild:RotaryEncoder_Bourns_PEC11L-Switch_Vertical_H20mm (layer F.Cu) (tedit 619A8E4F) (tstamp 61855925)
     (at 188 62.5)
     (descr "Bourns rotary encoder, PEC11L... with switch, vertical shaft, https://www.bourns.com/docs/Product-Datasheets/PEC11L.pdf")
     (tags "rotary encoder")
@@ -231,14 +231,14 @@
       (scale (xyz 1 1 1))
       (rotate (xyz 0 0 0))
     )
-    (model /workspace/kicad-libraries-wild/3d/pec11l-4x15f-sxxxx.stp
+    (model :Wild:pec11l-4x15f-sxxxx.stp
       (offset (xyz 7.5 -2.5 12))
       (scale (xyz 1 1 1))
       (rotate (xyz 90 0 90))
     )
   )
 
-  (module Wild:Potentiometer_Bourns_PTV09A-1_Single_Vertical (layer F.Cu) (tedit 618C97FC) (tstamp 618559BC)
+  (module Wild:Potentiometer_Bourns_PTV09A-1_Single_Vertical (layer F.Cu) (tedit 619A8E3B) (tstamp 618559BC)
     (at 171.1 80.7)
     (descr "Potentiometer, vertical, Bourns PTV09A-1 Single, http://www.bourns.com/docs/Product-Datasheets/ptv09.pdf")
     (tags "Potentiometer vertical Bourns PTV09A-1 Single")
@@ -287,14 +287,14 @@
       (scale (xyz 1 1 1))
       (rotate (xyz 0 0 0))
     )
-    (model /workspace/kicad-libraries-wild/3d/ptv09a-4X20u.stp
+    (model :Wild:ptv09a-4X20u.stp
       (offset (xyz 7 2.5 5.5))
       (scale (xyz 1 1 1))
       (rotate (xyz 90 0 -90))
     )
   )
 
-  (module Wild:Potentiometer_Bourns_PTV09A-1_Single_Vertical (layer F.Cu) (tedit 618C97FC) (tstamp 6187615B)
+  (module Wild:Potentiometer_Bourns_PTV09A-1_Single_Vertical (layer F.Cu) (tedit 619A8E3B) (tstamp 6187615B)
     (at 171.1 60.7)
     (descr "Potentiometer, vertical, Bourns PTV09A-1 Single, http://www.bourns.com/docs/Product-Datasheets/ptv09.pdf")
     (tags "Potentiometer vertical Bourns PTV09A-1 Single")
@@ -344,14 +344,14 @@
       (scale (xyz 1 1 1))
       (rotate (xyz 0 0 0))
     )
-    (model /workspace/kicad-libraries-wild/3d/ptv09a-4X20u.stp
+    (model :Wild:ptv09a-4X20u.stp
       (offset (xyz 7 2.5 5.5))
       (scale (xyz 1 1 1))
       (rotate (xyz 90 0 -90))
     )
   )
 
-  (module Wild:GCT_FFC2B28-16_1x16-1MP_P0.5mm_Horizontal (layer F.Cu) (tedit 618C954E) (tstamp 61855A34)
+  (module Wild:GCT_FFC2B28-16_1x16-1MP_P0.5mm_Horizontal (layer F.Cu) (tedit 619A8E44) (tstamp 61855A34)
     (at 149.1 69)
     (path /61855B25)
     (attr smd)
@@ -405,14 +405,14 @@
       (net 13 "Net-(C15-Pad1)"))
     (pad 1 smd rect (at -3.75 0) (size 0.3 1.2) (layers F.Cu F.Paste F.Mask)
       (net 12 "Net-(C15-Pad2)"))
-    (model /workspace/kicad-libraries-wild/3d/FFC2B28-16-G.stp
+    (model :Wild:FFC2B28-16-G.stp
       (offset (xyz 0 -0.2 0))
       (scale (xyz 1 1 1))
       (rotate (xyz -90 0 0))
     )
   )
 
-  (module Wild:USB_C_Receptacle_GCT_USB4105 (layer F.Cu) (tedit 618C9460) (tstamp 618881E5)
+  (module Wild:USB_C_Receptacle_GCT_USB4105 (layer F.Cu) (tedit 619A8E5D) (tstamp 618881E5)
     (at 132.5 47.3 180)
     (path /61848F4A)
     (fp_text reference X1 (at 0 3.6) (layer F.Fab)
@@ -477,7 +477,7 @@
       (net 1 GND))
     (pad A1 smd rect (at -3.35 0 180) (size 0.3 1.15) (layers F.Cu F.Paste F.Mask)
       (net 1 GND))
-    (model /workspace/kicad-libraries-wild/3d/USB4105-GF-A.stp
+    (model :Wild:USB4105-GF-A.stp
       (offset (xyz 0 -7.5 0))
       (scale (xyz 1 1 1))
       (rotate (xyz -90 0 0))
