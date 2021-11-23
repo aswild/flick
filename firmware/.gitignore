@@ -1,0 +1,11 @@
+/obj
+/config.mk
+.size_done
+
+*.o
+*.d
+*.bin
+*.elf
+*.hex
+*.map
+*.swp
