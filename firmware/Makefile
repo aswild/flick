@@ -24,6 +24,8 @@ ifeq ($(SKETCH_FROM_SUBDIR),1)
 override SKETCH := $(SKETCH)
 endif
 
+SKETCH ?= flick
+
 # allow for persistent config
 -include config.mk
 
