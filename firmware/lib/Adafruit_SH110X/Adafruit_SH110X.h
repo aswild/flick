@@ -109,6 +109,7 @@ public:
   bool begin(uint8_t i2caddr = 0x3C, bool reset = true);
 };
 
+#if 0
 /*!
     @brief  Class that stores state and functions for interacting with
             SH1107 OLED displays.
@@ -127,4 +128,5 @@ public:
 
   bool begin(uint8_t i2caddr = 0x3C, bool reset = true);
 };
+#endif
 #endif // _Adafruit_SH110X_H_
