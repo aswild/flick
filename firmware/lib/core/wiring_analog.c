@@ -188,7 +188,7 @@ int analogRead(pin_size_t pin)
   return mapResolution(valueRead, _ADCResolution, _readResolution);
 }
 
-
+#if 0 // disable analogWrite
 // Right now, PWM output only works on the pins with
 // hardware support.  These are defined in the appropriate
 // pins_*.c file.  For the rest of the pins, we default
@@ -317,6 +317,7 @@ void analogWrite(pin_size_t pin, int value)
     digitalWrite(pin, HIGH);
   }
 }
+#endif
 
 #ifdef __cplusplus
 }

@@ -94,12 +94,6 @@ typedef enum _ETCChannel
 #endif // __SAMD21J18A__
 } ETCChannel ;
 
-extern const void* g_apTCInstances[TCC_INST_NUM+TC_INST_NUM] ;
-
-#define GetTCNumber( x ) ( (x) >> 8 )
-#define GetTCChannelNumber( x ) ( (x) & 0xff )
-#define GetTC( x ) ( g_apTCInstances[(x) >> 8] )
-
 // Definitions for PWM channels
 typedef enum _EPWMChannel
 {

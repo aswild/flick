@@ -16,8 +16,8 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef _VARIANT_ARDUINO_ZERO_
-#define _VARIANT_ARDUINO_ZERO_
+#ifndef VARIANT_FLICK_H
+#define VARIANT_FLICK_H
 
 // The definitions here needs a SAMD core >=1.6.10
 #define ARDUINO_SAMD_VARIANT_COMPLIANCE 10610
@@ -55,11 +55,8 @@ extern "C"
  *----------------------------------------------------------------------------*/
 
 // Number of pins defined in PinDescription array
-#define PINS_COUNT           (26u)
-#define NUM_DIGITAL_PINS     (14u)
-#define NUM_ANALOG_INPUTS    (6u)
-#define NUM_ANALOG_OUTPUTS   (1u)
-#define analogInputToDigitalPin(p)  ((p < 6u) ? (p) + 14u : -1)
+#define PINS_COUNT           g_APinDescriptionLength
+#define NUM_DIGITAL_PINS     10
 
 #define digitalPinToPort(P)        ( &(PORT->Group[g_APinDescription[P].ulPort]) )
 #define digitalPinToBitMask(P)     ( 1 << g_APinDescription[P].ulPin )
@@ -69,62 +66,23 @@ extern "C"
 #define portModeRegister(port)     ( &(port->DIR.reg) )
 #define digitalPinHasPWM(P)        ( g_APinDescription[P].ulPWMChannel != NOT_ON_PWM || g_APinDescription[P].ulTCChannel != NOT_ON_TIMER )
 
-/*
- * digitalPinToTimer(..) is AVR-specific and is not defined for SAMD
- * architecture. If you need to check if a pin supports PWM you must
- * use digitalPinHasPWM(..).
- *
- * https://github.com/arduino/Arduino/issues/1833
- */
-// #define digitalPinToTimer(P)
-
-// LEDs
-#define PIN_LED_13           (13u)
-#define PIN_LED_RXL          (25u)
-#define PIN_LED_TXL          (26u)
-#define PIN_LED              PIN_LED_13
-#define PIN_LED2             PIN_LED_RXL
-#define PIN_LED3             PIN_LED_TXL
-#define LED_BUILTIN          PIN_LED_13
-
-/*
- * Analog pins
- */
-#define PIN_A0               (14ul)
-#define PIN_A1               (15ul)
-#define PIN_A2               (16ul)
-#define PIN_A3               (17ul)
-#define PIN_A4               (18ul)
-#define PIN_A5               (19ul)
-#define PIN_DAC0             (14ul)
-
-static const uint8_t A0  = PIN_A0;
-static const uint8_t A1  = PIN_A1;
-static const uint8_t A2  = PIN_A2;
-static const uint8_t A3  = PIN_A3;
-static const uint8_t A4  = PIN_A4;
-static const uint8_t A5  = PIN_A5;
-static const uint8_t DAC0 = PIN_DAC0;
-#define ADC_RESOLUTION		12
+// pin names
+static const pin_size_t PIN_LED_TRIG    = 0;
+static const pin_size_t PIN_ROT_PB      = 1;
+static const pin_size_t PIN_ROT_A       = 2;
+static const pin_size_t PIN_ROT_B       = 3;
+static const pin_size_t PIN_OLED_DC     = 4;
+static const pin_size_t PIN_OLED_RESET  = 5;
+static const pin_size_t PIN_OLED_CS     = 6;
+static const pin_size_t PIN_OLED_MOSI   = 7;
+static const pin_size_t PIN_OLED_SCK    = 8;
+static const pin_size_t PIN_NC_MISO     = 9;
+static const pin_size_t PIN_PHOTO_THRESH = 10;
+static const pin_size_t PIN_PHOTO_VAL   = 11;
 
 // Other pins
 #define PIN_ATN              (38ul)
 static const uint8_t ATN = PIN_ATN;
-
-/*
- * Serial interfaces
- */
-// Serial (EDBG)
-#define PIN_SERIAL_RX       (31ul)
-#define PIN_SERIAL_TX       (30ul)
-#define PAD_SERIAL_TX       (UART_TX_PAD_2)
-#define PAD_SERIAL_RX       (SERCOM_RX_PAD_3)
-
-// Serial1
-#define PIN_SERIAL1_RX       (0ul)
-#define PIN_SERIAL1_TX       (1ul)
-#define PAD_SERIAL1_TX       (UART_TX_PAD_2)
-#define PAD_SERIAL1_RX       (SERCOM_RX_PAD_3)
 
 /*
  * SPI Interfaces
@@ -132,38 +90,32 @@ static const uint8_t ATN = PIN_ATN;
 #define SPI_INTERFACES_COUNT 1
 // Instead of using SERCOM4, and the SPI-header pins, the Mini Breakout
 // uses pins 10-13 for SPI, on the unused sercom1
-#define PIN_SPI_MISO         (12u)
-#define PIN_SPI_MOSI         (11u)
-#define PIN_SPI_SCK          (13u)
-#define PIN_SPI_SS           (10u)
-#define PERIPH_SPI           sercom1
+#define PIN_SPI_MISO    PIN_NC_MISO
+#define PIN_SPI_MOSI    PIN_OLED_MOSI
+#define PIN_SPI_SCK     PIN_OLED_SCK
+#define PERIPH_SPI      sercom1
 // Pad Map:     0       1   2     3
 //          MOSI (TX)  SCK  SS  MOSI (RX)
-#define PAD_SPI_TX           SPI_PAD_0_SCK_1
-#define PAD_SPI_RX           SERCOM_RX_PAD_3
-
-static const uint8_t SS	  = PIN_SPI_SS;
-static const uint8_t MOSI = PIN_SPI_MOSI;
-static const uint8_t MISO = PIN_SPI_MISO;
-static const uint8_t SCK  = PIN_SPI_SCK;
+#define PAD_SPI_TX SPI_PAD_0_SCK_1
+#define PAD_SPI_RX SERCOM_RX_PAD_3
 
 /*
  * Wire Interfaces
  */
-#define WIRE_INTERFACES_COUNT 1
-
+#define WIRE_INTERFACES_COUNT 0
+#if 0
 #define PIN_WIRE_SDA         (20u)
 #define PIN_WIRE_SCL         (21u)
 #define PERIPH_WIRE          sercom3
 #define WIRE_IT_HANDLER      SERCOM3_Handler
-
 static const uint8_t SDA = PIN_WIRE_SDA;
 static const uint8_t SCL = PIN_WIRE_SCL;
+#endif
 
 /*
  * USB
  */
-#define PIN_USB_HOST_ENABLE (27ul)
+//#define PIN_USB_HOST_ENABLE (27ul)
 #define PIN_USB_DM          (28ul)
 #define PIN_USB_DP          (29ul)
 
@@ -175,13 +127,14 @@ static const uint8_t SCL = PIN_WIRE_SCL;
 /*
  * I2S Interfaces
  */
-#define I2S_INTERFACES_COUNT 1
-
+#define I2S_INTERFACES_COUNT 0
+#if 0
 #define I2S_DEVICE          0
 #define I2S_CLOCK_GENERATOR 3
 #define PIN_I2S_SD          (9u)
 #define PIN_I2S_SCK         (1u)
 #define PIN_I2S_FS          (0u)
+#endif
 
 #ifdef __cplusplus
 }
@@ -204,31 +157,7 @@ extern SERCOM sercom3;
 extern SERCOM sercom4;
 extern SERCOM sercom5;
 
-//extern Uart Serial;
-extern arduino::Uart Serial1;
+#endif /* __cplusplus */
 
-#endif
-
-// These serial port names are intended to allow libraries and architecture-neutral
-// sketches to automatically default to the correct port name for a particular type
-// of use.  For example, a GPS module would normally connect to SERIAL_PORT_HARDWARE_OPEN,
-// the first hardware serial port whose RX/TX pins are not dedicated to another use.
-//
-// SERIAL_PORT_MONITOR        Port which normally prints to the Arduino Serial Monitor
-//
-// SERIAL_PORT_USBVIRTUAL     Port which is USB virtual serial
-//
-// SERIAL_PORT_LINUXBRIDGE    Port which connects to a Linux system via Bridge library
-//
-// SERIAL_PORT_HARDWARE       Hardware serial port, physical RX & TX pins.
-//
-// SERIAL_PORT_HARDWARE_OPEN  Hardware serial ports which are open for use.  Their RX & TX
-//                            pins are NOT connected to anything by default.
-#define SERIAL_PORT_USBVIRTUAL      SerialUSB
-#define SERIAL_PORT_MONITOR         Serial
-// Serial has no physical pins broken out, so it's not listed as HARDWARE port
-#define SERIAL_PORT_HARDWARE        Serial1
-#define SERIAL_PORT_HARDWARE_OPEN   Serial1
-
-#endif /* _VARIANT_ARDUINO_ZERO_ */
+#endif /* VARIANT_FLICK_H */
 
