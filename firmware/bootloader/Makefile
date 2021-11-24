@@ -81,7 +81,7 @@ LLDFLAGS   += -Wl,--warn-common -Wl,--warn-section-align
 LLDFLAGS   += -Wl,-Map=$(TARGET).map
 LLDFLAGS   += -L$(CMSIS_DIR)
 
-LLIBS       = -larm_cortexM0l_math
+LLIBS       =
 
 define override_flags =
 override $(1) := $$(strip $$(L$(1)) $$($(1)))

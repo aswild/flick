@@ -28,6 +28,7 @@
  */
 
 #include "cdc_enumerate.h"
+#include "../main.h"
 #include <stdint.h>
 #include <compiler.h>
 #include <string.h>
@@ -814,7 +815,7 @@ bool cdc_is_rx_ready(void)
 
 uint32_t cdc_write_buf(void const* data, uint32_t length)
 {
-	PORT->Group[0].OUTTGL.reg = (1<<27); // Toggle TX LED
+	PORT->Group[LED_PORT].OUTTGL.reg = 1 << LED_PIN; // Toggle TX LED
 
 	/* Send the specified number of bytes on USB CDC */
 	USB_Write(&pCdc, (const char *)data, length, USB_EP_IN);
@@ -823,7 +824,7 @@ uint32_t cdc_write_buf(void const* data, uint32_t length)
 
 uint32_t cdc_read_buf(void* data, uint32_t length)
 {
-	PORT->Group[1].OUTTGL.reg = (1<<3); // Toggle RX LED
+	PORT->Group[LED_PORT].OUTTGL.reg = 1 << LED_PIN; // Toggle RX LED
 
 	/* Check whether the device is configured */
 	if ( !USB_IsConfigured(&pCdc) )

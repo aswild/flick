@@ -60,3 +60,5 @@
 #define BOOT_USART_PAD1                   PINMUX_UNUSED
 #define BOOT_USART_PAD0                   PINMUX_UNUSED
 
+#define LED_PORT 0
+#define LED_PIN  18

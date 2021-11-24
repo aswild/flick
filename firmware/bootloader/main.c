@@ -96,10 +96,6 @@ static volatile bool main_b_cdc_enable = false;
  */
 static void check_start_application(void)
 {
-	volatile PortGroup *led_port = (volatile PortGroup *)&PORT->Group[1];
-	led_port->DIRSET.reg = (1<<30);
-	led_port->OUTCLR.reg = (1<<30);
-
 #if defined(BOOT_DOUBLE_TAP_ADDRESS)
 	#define DOUBLE_TAP_MAGIC 0x07738135
 	if (PM->RCAUSE.bit.POR)
@@ -161,8 +157,6 @@ static void check_start_application(void)
 	}
 #endif
 
-	led_port->OUTSET.reg = (1<<30);
-
 	/* Rebase the Stack Pointer */
 	__set_MSP(*(uint32_t *) APP_START_ADDRESS);
 
@@ -176,16 +170,10 @@ static void check_start_application(void)
 
 void system_init()
 {
-	PORT->Group[1].DIRSET.reg = (1<<3);  // PB03, yellow rx LED
-	PORT->Group[1].OUTSET.reg = (1<<3);
-	PORT->Group[0].DIRSET.reg = (1<<27); // PA27, green tx LED
-#ifdef APPMODE
-	PORT->Group[0].OUTCLR.reg = (1<<27); // enable green LED
-	PORT->Group[0].DIRSET.reg = (1<<17); // PA17, blue LED
-	PORT->Group[0].OUTCLR.reg = (1<<17); // disable blue LED
-#else
-	PORT->Group[0].OUTSET.reg = (1<<27);
-#endif
+	/* initialize status LED */
+	PORT->Group[LED_PORT].DIRSET.reg = 1 << LED_PIN;
+	PORT->Group[LED_PORT].OUTSET.reg = 1 << LED_PIN;
+
 	/* Configure flash wait states */
 	NVMCTRL->CTRLB.bit.RWS = FLASH_WAIT_STATES;
 
