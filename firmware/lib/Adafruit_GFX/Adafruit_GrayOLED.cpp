@@ -27,6 +27,7 @@
 
 // CONSTRUCTORS, DESTRUCTOR ------------------------------------------------
 
+#if 0 // remove I2C
 /*!
     @brief  Constructor for I2C-interfaced OLED displays.
     @param  bpp Bits per pixel, 1 for monochrome, 4 for 16-gray
@@ -68,6 +69,7 @@ Adafruit_GrayOLED::Adafruit_GrayOLED(uint8_t bpp, uint16_t w, uint16_t h,
   i2c_dev = NULL;
   _theWire = twi;
 }
+#endif
 
 /*!
     @brief  Constructor for SPI GrayOLED displays, using software (bitbang)
@@ -153,8 +155,8 @@ Adafruit_GrayOLED::~Adafruit_GrayOLED(void) {
   }
   if (spi_dev)
     delete spi_dev;
-  if (i2c_dev)
-    delete i2c_dev;
+  //if (i2c_dev)
+  //  delete i2c_dev;
 }
 
 // LOW-LEVEL UTILS ---------------------------------------------------------
@@ -165,13 +167,13 @@ Adafruit_GrayOLED::~Adafruit_GrayOLED(void) {
     @param c The single byte command
 */
 void Adafruit_GrayOLED::oled_command(uint8_t c) {
-  if (i2c_dev) {                // I2C
-    uint8_t buf[2] = {0x00, c}; // Co = 0, D/C = 0
-    i2c_dev->write(buf, 2);
-  } else { // SPI (hw or soft) -- transaction started in calling function
+  //if (i2c_dev) {                // I2C
+  //  uint8_t buf[2] = {0x00, c}; // Co = 0, D/C = 0
+  //  i2c_dev->write(buf, 2);
+  //} else { // SPI (hw or soft) -- transaction started in calling function
     digitalWrite(dcPin, LOW);
     spi_dev->write(&c, 1);
-  }
+  //}
 }
 
 // Issue list of commands to GrayOLED
@@ -184,17 +186,17 @@ void Adafruit_GrayOLED::oled_command(uint8_t c) {
 */
 
 bool Adafruit_GrayOLED::oled_commandList(const uint8_t *c, uint8_t n) {
-  if (i2c_dev) {            // I2C
-    uint8_t dc_byte = 0x00; // Co = 0, D/C = 0
-    if (!i2c_dev->write((uint8_t *)c, n, true, &dc_byte, 1)) {
-      return false;
-    }
-  } else { // SPI -- transaction started in calling function
+  //if (i2c_dev) {            // I2C
+  //  uint8_t dc_byte = 0x00; // Co = 0, D/C = 0
+  //  if (!i2c_dev->write((uint8_t *)c, n, true, &dc_byte, 1)) {
+  //    return false;
+  //  }
+  //} else { // SPI -- transaction started in calling function
     digitalWrite(dcPin, LOW);
     if (!spi_dev->write((uint8_t *)c, n)) {
       return false;
     }
-  }
+  //}
   return true;
 }
 
@@ -240,18 +242,19 @@ bool Adafruit_GrayOLED::_init(uint8_t addr, bool reset) {
   }
 
   // Setup pin directions
-  if (_theWire) { // using I2C
-    i2c_dev = new Adafruit_I2CDevice(addr, _theWire);
-    // look for i2c address:
-    if (!i2c_dev || !i2c_dev->begin()) {
-      return false;
-    }
-  } else { // Using one of the SPI modes, either soft or hardware
+  (void)addr;
+  //if (_theWire) { // using I2C
+  //  i2c_dev = new Adafruit_I2CDevice(addr, _theWire);
+  //  // look for i2c address:
+  //  if (!i2c_dev || !i2c_dev->begin()) {
+  //    return false;
+  //  }
+  //} else { // Using one of the SPI modes, either soft or hardware
     if (!spi_dev || !spi_dev->begin()) {
       return false;
     }
     pinMode(dcPin, OUTPUT); // Set data/command pin as output
-  }
+  //}
 
   clearDisplay();
 

@@ -40,7 +40,7 @@
 #include "splash.h"
 
 // CONSTRUCTORS, DESTRUCTOR ------------------------------------------------
-
+#if 0
 /*!
     @brief  Constructor for I2C-interfaced SH110X displays.
     @param  w
@@ -77,6 +77,7 @@ Adafruit_SH110X::Adafruit_SH110X(uint16_t w, uint16_t h, TwoWire *twi,
                                  int8_t rst_pin, uint32_t clkDuring,
                                  uint32_t clkAfter)
     : Adafruit_GrayOLED(1, w, h, twi, rst_pin, clkDuring, clkAfter) {}
+#endif
 
 /*!
     @brief  Constructor for SPI SH110X displays, using software (bitbang)
@@ -162,11 +163,11 @@ void Adafruit_SH110X::display(void) {
   yield();
 
   uint8_t *ptr = buffer;
-  uint8_t dc_byte = 0x40;
+  //uint8_t dc_byte = 0x40;
   uint8_t pages = ((HEIGHT + 7) / 8);
 
   uint8_t bytes_per_page = WIDTH;
-  uint16_t maxbuff = i2c_dev->maxBufferSize() - 1;
+  //uint16_t maxbuff = i2c_dev->maxBufferSize() - 1;
 
   /*
   Serial.print("Window: (");
@@ -206,29 +207,29 @@ void Adafruit_SH110X::display(void) {
     // cut off end of dirty rectangle
     bytes_remaining -= (WIDTH - 1) - page_end;
 
-    if (i2c_dev) { // I2C
-      uint8_t cmd[] = {
-          0x00, (uint8_t)(SH110X_SETPAGEADDR + p),
-          (uint8_t)(0x10 + ((page_start + _page_start_offset) >> 4)),
-          (uint8_t)((page_start + _page_start_offset) & 0xF)};
+    //if (i2c_dev) { // I2C
+    //  uint8_t cmd[] = {
+    //      0x00, (uint8_t)(SH110X_SETPAGEADDR + p),
+    //      (uint8_t)(0x10 + ((page_start + _page_start_offset) >> 4)),
+    //      (uint8_t)((page_start + _page_start_offset) & 0xF)};
 
-      // Set high speed clk
-      i2c_dev->setSpeed(i2c_preclk);
+    //  // Set high speed clk
+    //  i2c_dev->setSpeed(i2c_preclk);
 
-      i2c_dev->write(cmd, 4);
+    //  i2c_dev->write(cmd, 4);
 
-      while (bytes_remaining) {
-        uint8_t to_write = min(bytes_remaining, (uint8_t)maxbuff);
-        i2c_dev->write(ptr, to_write, true, &dc_byte, 1);
-        ptr += to_write;
-        bytes_remaining -= to_write;
-        yield();
-      }
+    //  while (bytes_remaining) {
+    //    uint8_t to_write = min(bytes_remaining, (uint8_t)maxbuff);
+    //    i2c_dev->write(ptr, to_write, true, &dc_byte, 1);
+    //    ptr += to_write;
+    //    bytes_remaining -= to_write;
+    //    yield();
+    //  }
 
-      // Set low speed clk
-      i2c_dev->setSpeed(i2c_postclk);
+    //  // Set low speed clk
+    //  i2c_dev->setSpeed(i2c_postclk);
 
-    } else { // SPI
+    //} else { // SPI
       uint8_t cmd[] = {
           (uint8_t)(SH110X_SETPAGEADDR + p),
           (uint8_t)(0x10 + ((page_start + _page_start_offset) >> 4)),
@@ -238,7 +239,7 @@ void Adafruit_SH110X::display(void) {
       spi_dev->write(cmd, 3);
       digitalWrite(dcPin, HIGH);
       spi_dev->write(ptr, bytes_remaining);
-    }
+    //}
   }
   // reset dirty window
   window_x1 = 1024;

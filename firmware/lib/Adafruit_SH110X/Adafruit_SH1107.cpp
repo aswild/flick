@@ -7,7 +7,7 @@
 #include "splash.h"
 
 // CONSTRUCTORS, DESTRUCTOR ------------------------------------------------
-
+#if 0
 /*!
     @brief  Constructor for I2C-interfaced SH1107 displays.
     @param  w
@@ -44,6 +44,7 @@ Adafruit_SH1107::Adafruit_SH1107(uint16_t w, uint16_t h, TwoWire *twi,
                                  int8_t rst_pin, uint32_t clkDuring,
                                  uint32_t clkAfter)
     : Adafruit_SH110X(w, h, twi, rst_pin, clkDuring, clkAfter) {}
+#endif
 
 /*!
     @brief  Constructor for SPI SH1107 displays, using software (bitbang)

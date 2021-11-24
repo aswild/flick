@@ -3,6 +3,7 @@
 #if !defined(SPI_INTERFACES_COUNT) ||                                          \
     (defined(SPI_INTERFACES_COUNT) && (SPI_INTERFACES_COUNT > 0))
 
+#if 0 // remove I2C
 /*!
  *    @brief  Create a register we access over an I2C Device (which defines the
  * bus and address)
@@ -87,6 +88,7 @@ Adafruit_BusIO_Register::Adafruit_BusIO_Register(
   _byteorder = byteorder;
   _width = width;
 }
+#endif
 
 /*!
  *    @brief  Write a buffer of data to the register location
@@ -100,9 +102,9 @@ bool Adafruit_BusIO_Register::write(uint8_t *buffer, uint8_t len) {
   uint8_t addrbuffer[2] = {(uint8_t)(_address & 0xFF),
                            (uint8_t)(_address >> 8)};
 
-  if (_i2cdevice) {
-    return _i2cdevice->write(buffer, len, true, addrbuffer, _addrwidth);
-  }
+  //if (_i2cdevice) {
+  //  return _i2cdevice->write(buffer, len, true, addrbuffer, _addrwidth);
+  //}
   if (_spidevice) {
     if (_spiregtype == ADDRESSED_OPCODE_BIT0_LOW_TO_WRITE) {
       // very special case!
@@ -202,9 +204,9 @@ bool Adafruit_BusIO_Register::read(uint8_t *buffer, uint8_t len) {
   uint8_t addrbuffer[2] = {(uint8_t)(_address & 0xFF),
                            (uint8_t)(_address >> 8)};
 
-  if (_i2cdevice) {
-    return _i2cdevice->write_then_read(addrbuffer, _addrwidth, buffer, len);
-  }
+  //if (_i2cdevice) {
+  //  return _i2cdevice->write_then_read(addrbuffer, _addrwidth, buffer, len);
+  //}
   if (_spidevice) {
     if (_spiregtype == ADDRESSED_OPCODE_BIT0_LOW_TO_WRITE) {
       // very special case!
