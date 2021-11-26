@@ -11,18 +11,32 @@
 #include "RotaryEncoder.h"
 #include "SPI.h"
 
+#include "util.h"
+
 static PWM pwm;
 static int pwm_chan;
 
 static Adafruit_SH1106G display(128, 64, &SPI, PIN_OLED_DC, PIN_OLED_RESET, PIN_OLED_CS);
 static RotaryEncoder encoder(PIN_ROT_B, PIN_ROT_A, RotaryEncoder::LatchMode::FOUR3);
 
-static void encoder_irq(void)
+static void encoder_irq()
 {
     encoder.tick();
 }
 
-void setup(void)
+void AC_Handler()
+{
+    if (AC->INTFLAG.bit.COMP0)
+    {
+        if (AC->STATUSA.bit.STATE0)
+            pwm.set_width_us(pwm_chan, 50);
+        else
+            pwm.set_width_us(pwm_chan, 0);
+    }
+    AC->INTFLAG.reg = AC_INTFLAG_MASK;
+}
+
+void setup()
 {
     //pinMode(10, OUTPUT);
     pwm.init();
@@ -32,6 +46,8 @@ void setup(void)
 
     pwm.start();
 
+    flick_init_ac();
+
     display.begin(0, true);
     display.display();
 
@@ -40,14 +56,40 @@ void setup(void)
     setInterruptFilter(PIN_ROT_A, true);
     setInterruptFilter(PIN_ROT_B, true);
 
-    auto& d = display;
-    d.setTextColor(SH110X_WHITE);
-    d.setTextSize(2);
-    // flip screen 180 degrees, as it sits on my desk more easily that way
-    d.setRotation(2);
+    display.setTextColor(SH110X_WHITE);
+    display.setTextSize(2);
 }
 
-void loop(void)
+static inline uint8_t analog_to_oled_y(int aval)
+{
+    return 63 - (aval >> 4);
+}
+
+void loop()
+{
+    static uint8_t values[128] = {0};
+    static size_t pos = 0;
+
+    int new_val = analogRead(PIN_PHOTO_VAL);
+    values[pos++] = analog_to_oled_y(new_val);
+    if (pos >= 128)
+        pos = 0;
+
+    int thresh = analogRead(PIN_PHOTO_THRESH);
+    display.clearDisplay();
+    display.writeFastHLine(0, analog_to_oled_y(thresh), 128, SH110X_WHITE);
+    for (size_t i = 0; i < 128; i++)
+    {
+        size_t j = (i + pos) % 128;
+        display.writePixel(i, values[j], SH110X_WHITE);
+    }
+
+    display.display();
+    delay(100);
+}
+
+#if 0
+void loop()
 {
     static int last_pos = 0;
     static int dir = 0;
@@ -57,8 +99,9 @@ void loop(void)
         dir = static_cast<int>(encoder.getDirection());
     }
 
-    int val = analogRead(PIN_PHOTO_THRESH);
-    pwm.set_chan(pwm_chan, val / 1024.0f, true);
+    //int val = analogRead(PIN_PHOTO_THRESH);
+    //pwm.set_chan(pwm_chan, val / 1024.0f, true);
+    int val = analogRead(PIN_PHOTO_VAL);
 
     auto& d = display;
     d.clearDisplay();
@@ -77,3 +120,4 @@ void loop(void)
 
     delay(10);
 }
+#endif
