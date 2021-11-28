@@ -50,6 +50,7 @@ void setup()
 
     display.begin(0, true);
     display.display();
+    delay(1000); // display splash screen
 
     attachInterrupt(PIN_ROT_A, encoder_irq, CHANGE);
     attachInterrupt(PIN_ROT_B, encoder_irq, CHANGE);

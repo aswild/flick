@@ -70,15 +70,18 @@ def write_image_code(im, name, input_name, out):
     out.write('{\n    ') # un-confuse vim's indentation
 
     for (i, b) in enumerate(data):
-        if i and i % 16 == 0:
-            out.write('\n    ')
-        out.write(f'0x{b:02x}, ')
+        if i:
+            if i % 16 == 0:
+                out.write(',\n    ')
+            else:
+                out.write(', ')
+        out.write(f'0x{b:02x}')
 
     out.write('\n};\n')
 
     # sanity check, recalculate size for good measure
     total_bytes = im.height * math.ceil(im.width / 8)
-    out.write(f'static_assert(sizeof({name}_data) == (({name}_width + 7) / 8) * {name}_height);\n')
+    out.write(f'\nstatic_assert(sizeof({name}_data) == (({name}_width + 7) / 8) * {name}_height);\n')
 
 def main():
     parser = argparse.ArgumentParser()
