@@ -25,7 +25,7 @@ SOURCES = $(COMMON_SRC) \
 
 SELF_SOURCES = $(COMMON_SRC) src/selfmain.c src/selfdata.c
 
-BOOTLOADER_SIZE = 8192
+BOOTLOADER_SIZE = 0x2000
 
 CMSIS_DIR = ../lib/CMSIS
 INCLUDES  = . inc inc/preprocessor boards/$(BOARD) lib/usb_msc
@@ -36,9 +36,9 @@ BOSSAC      ?= bossac
 BOSSAC_FLAGS = --erase --write --verify --reset --port=$(COMPORT)
 OS          := $(shell uname -s)
 ifeq ($(OS),Linux)
-RESET_SCRIPT = ../bin/reset-arduino-linux.sh -q $(COMPORT)
+RESET_SCRIPT = ../scripts/reset-arduino-linux.sh -q $(COMPORT)
 else
-RESET_SCRIPT = ../bin/ard-reset-arduino --zero $(COMPORT)
+RESET_SCRIPT = ../scripts/ard-reset-arduino --zero $(COMPORT)
 endif
 
 # my bossa-git AUR package sets the version to the Arch pkgver, which is 1.8.rXX.gYYYYYYY since
@@ -52,7 +52,7 @@ BOSSAC_FLAGS := $(filter-out --erase,$(BOSSAC_FLAGS))
 # must be zero (the default) or else the program would get written to 0x4000.
 # BOSSA v1.9 doesn't do that, so we must set the offset to 0x2000 or else the bootloader
 # will get overwritten, bricking the board.
-BOSSAC_FLAGS += --offset=$(FLASH_START)
+BOSSAC_FLAGS += --offset=$(BOOTLOADER_SIZE)
 endif
 
 # Tools Configuration
@@ -140,7 +140,7 @@ upload: $(TARGET_BIN) all
 	$(_V_UPLOAD_$(V))$(OPENOCD) $(OPENOCD_CMD)
 
 .PHONY: upload-bossa
-upload-bossa: $(TARGET_BIN) all
+upload-bossa: $(SELF_BIN) all
 	$(_V_RESET_$(V))$(RESET_SCRIPT)
 	$(_V_UPLOAD_$(V))$(BOSSAC) $(BOSSAC_FLAGS) $<
 
@@ -164,7 +164,7 @@ $(TARGET_HEX): $(TARGET_ELF)
 self: $(SELF_UF2)
 
 src/selfdata.c: $(TARGET_BIN) scripts/gendata.py
-	$(_V_GEN_$(V))python2 scripts/gendata.py $(BOOTLOADER_SIZE) $(TARGET_BIN)
+	$(_V_GEN_$(V))scripts/gendata.py $(BOOTLOADER_SIZE) $(TARGET_BIN)
 
 $(SELF_ELF): $(SELF_OBJ) $(SELF_LDSCRIPT)
 	$(_V_LD_$(V))$(CC) $(LDFLAGS) -T$(SELF_LDSCRIPT) -o $@ $(SELF_OBJ)

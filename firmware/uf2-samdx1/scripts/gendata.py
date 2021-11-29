@@ -1,6 +1,7 @@
+#!/usr/bin/env python3
+
 import sys
 import os
-
 
 def update_crc(new_byte, current_crc):
     crc = current_crc ^ new_byte << 8
@@ -14,7 +15,7 @@ def update_crc(new_byte, current_crc):
 
 
 # Load the bootloader file
-bootloader_size = int(sys.argv[1])
+bootloader_size = int(sys.argv[1], 0)
 bin_name = sys.argv[2]
 bootloader = bytearray()
 with open(bin_name, "rb") as bootloader_bin:
@@ -31,9 +32,9 @@ with open(selfdata_c_path, "w") as output:
                  "__attribute__ ((aligned (4))) = {")
     crcs = []
     crc = 0
-    for row in range(bootloader_size / 16):
+    for row in range(bootloader_size // 16):
         # Save the crc every 1k.
-        if row % (1024 / 16) == 0 and row > 0:
+        if row % (1024 // 16) == 0 and row > 0:
             crcs.append(crc)
             crc = 0
         start_index = row * 16
