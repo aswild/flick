@@ -23,7 +23,7 @@ void flick_init_ac()
     // AC analog clock. Max 64KHz ('37.6 Maximum Clock Frequencies' Table 37-6), GCLK1 @ 32.768KHz
     GCLK->CLKCTRL.reg = GCLK_CLKCTRL_ID(GCM_AC_ANA) | GCLK_CLKCTRL_GEN_GCLK1 | GCLK_CLKCTRL_CLKEN;
     // AC digital clock, for sampling & filtering. Max 48MHz, but use GCLK1 to 'slow down' filtering
-    GCLK->CLKCTRL.reg = GCLK_CLKCTRL_ID(GCM_AC_DIG) | GCLK_CLKCTRL_GEN_GCLK1 | GCLK_CLKCTRL_CLKEN;
+    GCLK->CLKCTRL.reg = GCLK_CLKCTRL_ID(GCM_AC_DIG) | GCLK_CLKCTRL_GEN_GCLK0 | GCLK_CLKCTRL_CLKEN;
 
     // wait for clock domain sync
     while (GCLK->STATUS.bit.SYNCBUSY);

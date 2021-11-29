@@ -7,14 +7,12 @@
 
 #include "Arduino.h"
 #include "Adafruit_SH110X.h"
-#include "PWM.h"
 #include "RotaryEncoder.h"
 #include "SPI.h"
 
 #include "util.h"
 
-static PWM pwm;
-static int pwm_chan;
+#define LED_DIRECT_ON_AC
 
 static Adafruit_SH1106G display(128, 64, &SPI, PIN_OLED_DC, PIN_OLED_RESET, PIN_OLED_CS);
 static RotaryEncoder encoder(PIN_ROT_B, PIN_ROT_A, RotaryEncoder::LatchMode::FOUR3);
@@ -26,26 +24,20 @@ static void encoder_irq()
 
 void AC_Handler()
 {
+#ifndef LED_DIRECT_ON_AC
     if (AC->INTFLAG.bit.COMP0)
     {
         if (AC->STATUSA.bit.STATE0)
-            pwm.set_width_us(pwm_chan, 50);
+            digitalWrite(PIN_LED_TRIG, HIGH);
         else
-            pwm.set_width_us(pwm_chan, 0);
+            digitalWrite(PIN_LED_TRIG, LOW);
     }
+#endif
     AC->INTFLAG.reg = AC_INTFLAG_MASK;
 }
 
 void setup()
 {
-    //pinMode(10, OUTPUT);
-    pwm.init();
-    pwm_chan = pwm.enable_pin(PIN_LED_TRIG);
-    if (pwm_chan == -1)
-        while (1) {}
-
-    pwm.start();
-
     flick_init_ac();
 
     display.begin(0, true);
@@ -59,6 +51,13 @@ void setup()
 
     display.setTextColor(SH110X_WHITE);
     display.setTextSize(2);
+
+    pinMode(PIN_ROT_PB, INPUT_PULLUP);
+#ifdef LED_DIRECT_ON_AC
+    pinPeripheral(PIN_LED_TRIG, PIO_AC_CLK);
+#else
+    pinMode(PIN_LED_TRIG, OUTPUT);
+#endif
 }
 
 static inline uint8_t analog_to_oled_y(int aval)
@@ -85,40 +84,18 @@ void loop()
         display.writePixel(i, values[j], SH110X_WHITE);
     }
 
+    static int last_enc_pos = 0;
+    if (!digitalRead(PIN_ROT_PB))
+        encoder.setPosition(0);
+
+    int enc_pos = encoder.getPosition();
+    if (enc_pos != last_enc_pos) {
+        last_enc_pos = enc_pos;
+    }
+
+    display.setCursor(0, 0);
+    display.print(enc_pos);
+
     display.display();
     delay(100);
 }
-
-#if 0
-void loop()
-{
-    static int last_pos = 0;
-    static int dir = 0;
-    int pos = encoder.getPosition();
-    if (pos != last_pos) {
-        last_pos = pos;
-        dir = static_cast<int>(encoder.getDirection());
-    }
-
-    //int val = analogRead(PIN_PHOTO_THRESH);
-    //pwm.set_chan(pwm_chan, val / 1024.0f, true);
-    int val = analogRead(PIN_PHOTO_VAL);
-
-    auto& d = display;
-    d.clearDisplay();
-    d.setCursor(0, 0);
-#if 0
-    d.print(val);
-    d.print('\n');
-    d.print((val * 100) / 1024.0);
-    d.print("%\n");
-#else
-    d.printf("%d\n%.1f%%\n", val, (val * 100.0) / 1024.0);
-#endif
-
-    d.printf("R: %d  %d", pos, dir);
-    d.display();
-
-    delay(10);
-}
-#endif
