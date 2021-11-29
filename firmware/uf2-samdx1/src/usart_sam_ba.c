@@ -64,7 +64,7 @@ void usart_open() {
         /* Mask 6th bit in pin number to check whether it is greater than 32
          * i.e., PORTB pin */
         port = (BOOT_USART_PAD0 & 0x200000) >> 21;
-        pin = BOOT_USART_PAD0 >> 16;
+        pin = (uint8_t)BOOT_USART_PAD0 >> 16;
         PORT->Group[port].PINCFG[(pin - (port * 32))].bit.PMUXEN = 1;
         PORT->Group[port].PMUX[(pin - (port * 32)) / 2].reg &= ~(0xF << (4 * (pin & 0x01u)));
         PORT->Group[port].PMUX[(pin - (port * 32)) / 2].reg |= (BOOT_USART_PAD0 & 0xFF)
@@ -74,7 +74,7 @@ void usart_open() {
         /* Mask 6th bit in pin number to check whether it is greater than 32
          * i.e., PORTB pin */
         port = (BOOT_USART_PAD1 & 0x200000) >> 21;
-        pin = BOOT_USART_PAD1 >> 16;
+        pin = (uint8_t)BOOT_USART_PAD1 >> 16;
         PORT->Group[port].PINCFG[(pin - (port * 32))].bit.PMUXEN = 1;
         PORT->Group[port].PMUX[(pin - (port * 32)) / 2].reg &= ~(0xF << (4 * (pin & 0x01u)));
         PORT->Group[port].PMUX[(pin - (port * 32)) / 2].reg |= (BOOT_USART_PAD1 & 0xFF)
@@ -84,7 +84,7 @@ void usart_open() {
         /* Mask 6th bit in pin number to check whether it is greater than 32
          * i.e., PORTB pin */
         port = (BOOT_USART_PAD2 & 0x200000) >> 21;
-        pin = BOOT_USART_PAD2 >> 16;
+        pin = (uint8_t)BOOT_USART_PAD2 >> 16;
         PORT->Group[port].PINCFG[(pin - (port * 32))].bit.PMUXEN = 1;
         PORT->Group[port].PMUX[(pin - (port * 32)) / 2].reg &= ~(0xF << (4 * (pin & 0x01u)));
         PORT->Group[port].PMUX[(pin - (port * 32)) / 2].reg |= (BOOT_USART_PAD2 & 0xFF)
@@ -94,7 +94,7 @@ void usart_open() {
         /* Mask 6th bit in pin number to check whether it is greater than 32
          * i.e., PORTB pin */
         port = (BOOT_USART_PAD3 & 0x200000) >> 21;
-        pin = BOOT_USART_PAD3 >> 16;
+        pin = (uint8_t)BOOT_USART_PAD3 >> 16;
         PORT->Group[port].PINCFG[(pin - (port * 32))].bit.PMUXEN = 1;
         PORT->Group[port].PMUX[(pin - (port * 32)) / 2].reg &= ~(0xF << (4 * (pin & 0x01u)));
         PORT->Group[port].PMUX[(pin - (port * 32)) / 2].reg |= (BOOT_USART_PAD3 & 0xFF)
@@ -199,6 +199,7 @@ uint32_t usart_putdata(void const *data, uint32_t length) {
 
 // Get data from comm. device
 uint32_t usart_getdata(void *data, uint32_t length) {
+    (void)length;
     uint8_t *ptrdata;
     ptrdata = (uint8_t *)data;
     *ptrdata = usart_getc();
@@ -309,10 +310,13 @@ uint8_t getPacket(uint8_t *ptr_data, uint8_t sno) {
     if (error_timeout == 1)
         return (false);
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-compare"
     if ((crc != xcrc) || (seq[0] != sno) || (seq[1] != (uint8_t)(~sno))) {
         usart_putc(CAN);
         return (false);
     }
+#pragma GCC diagnostic pop
 
     usart_putc(ACK);
     return (true);

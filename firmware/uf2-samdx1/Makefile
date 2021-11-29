@@ -1,67 +1,9 @@
-BOARD=zero
--include Makefile.user
+# Application Configuration
+BOARD ?= flick
 include boards/$(BOARD)/board.mk
-CC=arm-none-eabi-gcc
-ifeq ($(CHIP_FAMILY), samd21)
-COMMON_FLAGS = -mthumb -mcpu=cortex-m0plus -Os -g -DSAMD21
-endif
-ifeq ($(CHIP_FAMILY), samd51)
-COMMON_FLAGS = -mthumb -mcpu=cortex-m4 -O2 -g -DSAMD51
-endif
-WFLAGS = \
--Werror -Wall -Wstrict-prototypes \
--Werror-implicit-function-declaration -Wpointer-arith -std=gnu99 \
--ffunction-sections -fdata-sections -Wchar-subscripts -Wcomment -Wformat=2 \
--Wimplicit-int -Wmain -Wparentheses -Wsequence-point -Wreturn-type -Wswitch \
--Wtrigraphs -Wunused -Wuninitialized -Wunknown-pragmas -Wfloat-equal -Wno-undef \
--Wbad-function-cast -Wwrite-strings -Waggregate-return \
--Wformat -Wmissing-format-attribute \
--Wno-deprecated-declarations -Wpacked -Wredundant-decls -Wnested-externs \
--Wlong-long -Wunreachable-code -Wcast-align \
--Wno-missing-braces -Wno-overflow -Wno-shadow -Wno-attributes -Wno-packed -Wno-pointer-sign
-CFLAGS = $(COMMON_FLAGS) \
--x c -c -pipe -nostdlib \
---param max-inline-insns-single=500 \
--fno-strict-aliasing -fdata-sections -ffunction-sections \
--D__$(CHIP_VARIANT)__ \
-$(WFLAGS)
 
-UF2_VERSION_BASE = $(shell git describe --dirty --always --tags)
-
-ifeq ($(CHIP_FAMILY), samd21)
-LINKER_SCRIPT=scripts/samd21j18a.ld
-BOOTLOADER_SIZE=8192
-SELF_LINKER_SCRIPT=scripts/samd21j18a_self.ld
-endif
-
-ifeq ($(CHIP_FAMILY), samd51)
-LINKER_SCRIPT=scripts/samd51j19a.ld
-BOOTLOADER_SIZE=16384
-SELF_LINKER_SCRIPT=scripts/samd51j19a_self.ld
-endif
-
-LDFLAGS= $(COMMON_FLAGS) \
--Wall -Wl,--cref -Wl,--check-sections -Wl,--gc-sections -Wl,--unresolved-symbols=report-all -Wl,--warn-common \
--Wl,--warn-section-align \
--save-temps -nostartfiles \
---specs=nano.specs --specs=nosys.specs
-BUILD_PATH=build/$(BOARD)
-INCLUDES = -I. -I./inc -I./inc/preprocessor
-INCLUDES += -I./boards/$(BOARD) -Ilib/cmsis/CMSIS/Include -Ilib/usb_msc
-INCLUDES += -I$(BUILD_PATH)
-
-
-ifeq ($(CHIP_FAMILY), samd21)
-INCLUDES += -Ilib/samd21/samd21a/include/
-endif
-
-ifeq ($(CHIP_FAMILY), samd51)
-ifeq ($(findstring SAME54,$(CHIP_VARIANT)),SAME54)
-INCLUDES += -Ilib/same54/include/
-else
-INCLUDES += -Ilib/samd51/include/
-endif
-endif
+TARGET = $(BOARD)_bootloader
+SELF = $(BOARD)_update_bootloader
 
 COMMON_SRC = \
 	src/flash_$(CHIP_FAMILY).c \
@@ -81,145 +23,160 @@ SOURCES = $(COMMON_SRC) \
 	src/uart_driver.c \
 	src/hid.c \
 
-SELF_SOURCES = $(COMMON_SRC) \
-	src/selfmain.c
+SELF_SOURCES = $(COMMON_SRC) src/selfmain.c src/selfdata.c
 
-OBJECTS = $(patsubst src/%.c,$(BUILD_PATH)/%.o,$(SOURCES))
-SELF_OBJECTS = $(patsubst src/%.c,$(BUILD_PATH)/%.o,$(SELF_SOURCES)) $(BUILD_PATH)/selfdata.o
+BOOTLOADER_SIZE = 8192
 
-NAME=bootloader-$(BOARD)-$(UF2_VERSION_BASE)
-EXECUTABLE=$(BUILD_PATH)/$(NAME).bin
-SELF_EXECUTABLE=$(BUILD_PATH)/update-$(NAME).uf2
-SELF_EXECUTABLE_INO=$(BUILD_PATH)/update-$(NAME).ino
+CMSIS_DIR = ../lib/CMSIS
+INCLUDES  = . inc inc/preprocessor boards/$(BOARD) lib/usb_msc
+INCLUDES += ../lib/CMSIS/Include ../lib/CMSIS-Atmel ../lib/CMSIS-Atmel/samd21/include
 
-SUBMODULES = lib/uf2/README.md
+COMPORT     ?= /dev/ttyACM0
+BOSSAC      ?= bossac
+BOSSAC_FLAGS = --erase --write --verify --reset --port=$(COMPORT)
+OS          := $(shell uname -s)
+ifeq ($(OS),Linux)
+RESET_SCRIPT = ../bin/reset-arduino-linux.sh -q $(COMPORT)
+else
+RESET_SCRIPT = ../bin/ard-reset-arduino --zero $(COMPORT)
+endif
 
-all: $(SUBMODULES) dirs $(EXECUTABLE) $(SELF_EXECUTABLE)
+# my bossa-git AUR package sets the version to the Arch pkgver, which is 1.8.rXX.gYYYYYYY since
+# there hasn't been a v1.9 tag yet, so figure out the version by checking for the availability
+# of the --arduino-erase option
+BOSSA_19 := $(shell $(BOSSAC) --help 2>/dev/null | grep -q -e '--arduino-erase' && echo y || echo n)
+ifeq ($(BOSSA_19),y)
+# we have auto-erase available
+BOSSAC_FLAGS := $(filter-out --erase,$(BOSSAC_FLAGS))
+# BOSSA v1.8 hard-coded the flash starting address as 0x2000, so the command-line offset
+# must be zero (the default) or else the program would get written to 0x4000.
+# BOSSA v1.9 doesn't do that, so we must set the offset to 0x2000 or else the bootloader
+# will get overwritten, bricking the board.
+BOSSAC_FLAGS += --offset=$(FLASH_START)
+endif
 
-r: run
-b: burn
-l: logs
+# Tools Configuration
+TOOLCHAIN_BIN ?=
+CC      = $(TOOLCHAIN_BIN)arm-none-eabi-gcc
+CXX     = $(TOOLCHAIN_BIN)arm-none-eabi-g++
+AR      = $(TOOLCHAIN_BIN)arm-none-eabi-ar
+OBJCOPY = $(TOOLCHAIN_BIN)arm-none-eabi-objcopy
+OBJDUMP = $(TOOLCHAIN_BIN)arm-none-eabi-objdump
+SIZE    = $(TOOLCHAIN_BIN)arm-none-eabi-size
 
-burn: all
-	node scripts/dbgtool.js fuses
-	node scripts/dbgtool.js $(BUILD_PATH)/$(NAME).bin
+OPENOCD = openocd
+OPENOCD_CMD = -f ../openocd.cfg -c "program $(TARGET_BIN) verify reset exit"
 
-run: burn wait logs
+VERSION    := $(shell ../scripts/get_version.sh --sam-ba)
 
-# This currently only works on macOS with a BMP debugger attached.
-# It's meant to flash the bootloader in a loop.
-BMP = $(shell ls -1 /dev/cu.usbmodem* | head -1)
-BMP_ARGS = --nx -ex "set mem inaccessible-by-default off" -ex "set confirm off" -ex "target extended-remote $(BMP)" -ex "mon tpwr enable" -ex "mon swdp_scan" -ex "attach 1"
-GDB = arm-none-eabi-gdb
+LCPPFLAGS   = -DSAMD21 -D__SAMD21G18A__ -DUF2_VERSION_BASE='"$(VERSION)"'
+LCPPFLAGS  += $(addprefix -I,$(INCLUDES)) -MMD -MP
 
-bmp-flash: $(BUILD_PATH)/$(NAME).bin
-	@test "X$(BMP)" != "X"
-	$(GDB) $(BMP_ARGS) -ex "load" -ex "quit" $(BUILD_PATH)/$(NAME).elf | tee build/flash.log
-	@grep -q "Transfer rate" build/flash.log
+# used in CFLAGS/LDFLAGS
+CPUFLAGS    = -mcpu=cortex-m0plus -mthumb -ggdb3 -Os
 
-bmp-flashone:
-	while : ; do $(MAKE) bmp-flash && exit 0 ; sleep 1 ; done
-	afplay /System/Library/PrivateFrameworks/ScreenReader.framework/Versions/A/Resources/Sounds/Error.aiff
+# not used in LDFLAGS
+LCFLAGS     = -std=gnu99 $(CPUFLAGS) -Wall -Wextra -Werror -Wno-expansion-to-defined
+LCFLAGS    += -fno-exceptions -ffunction-sections -fdata-sections
 
-bmp-loop:
-	while : ; do $(MAKE) bmp-flashone ; sleep 5 ; done
+LDSCRIPT      = scripts/samd21j18a.ld
+SELF_LDSCRIPT = scripts/samd21j18a_self.ld
 
-bmp-gdb: $(BUILD_PATH)/$(NAME).bin
-	$(GDB) $(BMP_ARGS) $(BUILD_PATH)/$(NAME).elf
+LLDFLAGS    = $(CPUFLAGS) --specs=nano.specs --specs=nosys.specs
+LLDFLAGS   += -Wl,--cref -Wl,--check-sections -Wl,--gc-sections -Wl,--unresolved-symbols=report-all
+LLDFLAGS   += -Wl,--warn-common -Wl,--warn-section-align
+LLDFLAGS   += -Wl,-Map=$(TARGET).map
+LLDFLAGS   += -L$(CMSIS_DIR)
 
-$(BUILD_PATH)/flash.jlink: $(BUILD_PATH)/$(NAME).bin
-	echo " \n\
-r \n\
-h \n\
-loadbin \"$(BUILD_PATH)/$(NAME).bin\", 0x0 \n\
-verifybin \"$(BUILD_PATH)/$(NAME).bin\", 0x0 \n\
-r \n\
-qc \n\
-" > $(BUILD_PATH)/flash.jlink
+define override_flags =
+override $(1) := $$(strip $$(L$(1)) $$($(1)))
+endef
+$(foreach f,CPPFLAGS CFLAGS LDFLAGS,$(eval $(call override_flags,$(f))))
 
-jlink-flash: $(BUILD_PATH)/$(NAME).bin $(BUILD_PATH)/flash.jlink
-	jlinkexe -if swd -device AT$(CHIP_VARIANT) -speed 4000 -CommanderScript $(BUILD_PATH)/flash.jlink
+TARGET_OBJ  = $(SOURCES:.c=.o)
+DEPS        = $(TARGET_OBJ:.o=.d)
+TARGET_ELF  = $(TARGET).elf
+TARGET_BIN  = $(TARGET).bin
+TARGET_HEX  = $(TARGET).hex
 
-wait:
-	sleep 5
+SELF_OBJ    = $(SELF_SOURCES:.c=.o)
+DEPS       += $(SELF_OBJ:.o=.d)
+SELF_ELF    = $(SELF).elf
+SELF_BIN    = $(SELF).bin
+SELF_UF2    = $(SELF).uf2
 
-logs:
-	node scripts/dbgtool.js $(BUILD_PATH)/$(NAME).map
+V ?= 0
+_V_CC_0     = @echo "  CC      " $<;
+_V_CXX_0    = @echo "  CXX     " $<;
+_V_AS_0     = @echo "  AS      " $<;
+_V_LD_0     = @echo "  LD      " $@;
+_V_AR_0     = @echo "  AR      " $@;
+_V_BIN_0    = @echo "  BIN     " $@;
+_V_HEX_0    = @echo "  HEX     " $@;
+_V_GEN_0    = @echo "  GEN     " $@;
+_V_UF2_0    = @echo "  UF2     " $@;
+_V_SIZE_0   = @echo "Program Size:";
+_V_RESET_0  = @echo "  RESET   " $(COMPORT);
+_V_UPLOAD_0 = @echo "  UPLOAD  " $<;
+_V_CLEAN_0  = @echo "  CLEAN";
 
-selflogs:
-	node scripts/dbgtool.js $(BUILD_PATH)/update-$(NAME).map
+CLEAN_FILES  = $(TARGET_OBJ) $(SELF_OBJ) $(DEPS) $(TARGET_ELF) $(TARGET_BIN) $(TARGET_HEX) $(TARGET).map .size_done
+CLEAN_FILES += $(SELF_ELF) $(SELF_BIN) $(SELF_UF2) src/selfdata.c
 
-dirs:
-	@echo "Building $(BOARD)"
-	-@mkdir -p $(BUILD_PATH)
+.PHONY: all
+all: $(TARGET_BIN) $(SELF_UF2) .size_done
 
-$(EXECUTABLE): $(OBJECTS)
-	$(CC) -L$(BUILD_PATH) $(LDFLAGS) \
-		 -T$(LINKER_SCRIPT) \
-		 -Wl,-Map,$(BUILD_PATH)/$(NAME).map -o $(BUILD_PATH)/$(NAME).elf $(OBJECTS)
-	arm-none-eabi-objcopy -O binary $(BUILD_PATH)/$(NAME).elf $@
-	@echo
-	-@arm-none-eabi-size $(BUILD_PATH)/$(NAME).elf | awk '{ s=$$1+$$2; print } END { print ""; print "Space left: " ($(BOOTLOADER_SIZE)-s) }'
-	@echo
+SIZE_CMD = $(_V_SIZE_$(V))../scripts/print-size.py -q $(TARGET_ELF)
+.PHONY: size
+size: $(TARGET_ELF)
+	$(SIZE_CMD)
 
-$(BUILD_PATH)/uf2_version.h: Makefile
-	echo "#define UF2_VERSION_BASE \"$(UF2_VERSION_BASE)\""> $@
+.size_done: $(TARGET_ELF) | $(TARGET_BIN)
+	$(SIZE_CMD)
+	@touch $@
 
-$(SELF_EXECUTABLE): $(SELF_OBJECTS)
-	$(CC) -L$(BUILD_PATH) $(LDFLAGS) \
-		 -T$(SELF_LINKER_SCRIPT) \
-		 -Wl,-Map,$(BUILD_PATH)/update-$(NAME).map -o $(BUILD_PATH)/update-$(NAME).elf $(SELF_OBJECTS)
-	arm-none-eabi-objcopy -O binary $(BUILD_PATH)/update-$(NAME).elf $(BUILD_PATH)/update-$(NAME).bin
-	python2 lib/uf2/utils/uf2conv.py -b $(BOOTLOADER_SIZE) -c -o $@ $(BUILD_PATH)/update-$(NAME).bin
+.PHONY: upload
+upload: $(TARGET_BIN) all
+	$(_V_UPLOAD_$(V))$(OPENOCD) $(OPENOCD_CMD)
 
-$(BUILD_PATH)/%.o: src/%.c $(wildcard inc/*.h boards/*/*.h) $(BUILD_PATH)/uf2_version.h
-	echo "$<"
-	$(CC) $(CFLAGS) $(BLD_EXTA_FLAGS) $(INCLUDES) $< -o $@
+.PHONY: upload-bossa
+upload-bossa: $(TARGET_BIN) all
+	$(_V_RESET_$(V))$(RESET_SCRIPT)
+	$(_V_UPLOAD_$(V))$(BOSSAC) $(BOSSAC_FLAGS) $<
 
-$(BUILD_PATH)/%.o: $(BUILD_PATH)/%.c
-	$(CC) $(CFLAGS) $(BLD_EXTA_FLAGS) $(INCLUDES) $< -o $@
+.PHONY: hex
+hex: $(TARGET_HEX)
 
-$(BUILD_PATH)/selfdata.c: $(EXECUTABLE) scripts/gendata.py src/sketch.cpp
-	python2 scripts/gendata.py $(BOOTLOADER_SIZE) $(EXECUTABLE)
-
+.PHONY: clean
 clean:
-	rm -rf build
+	$(_V_CLEAN_$(V))rm -f $(CLEAN_FILES)
 
-gdb:
-	arm-none-eabi-gdb $(BUILD_PATH)/$(NAME).elf
+$(TARGET_ELF): $(TARGET_OBJ) $(LDSCRIPT)
+	$(_V_LD_$(V))$(CC) $(LDFLAGS) -T$(LDSCRIPT) -o $@ $(TARGET_OBJ)
 
-tui:
-	arm-none-eabi-gdb -tui $(BUILD_PATH)/$(NAME).elf
+$(TARGET_BIN): $(TARGET_ELF)
+	$(_V_BIN_$(V))$(OBJCOPY) -O binary $< $@
 
-%.asmdump: %.o
-	arm-none-eabi-objdump -d $< > $@
+$(TARGET_HEX): $(TARGET_ELF)
+	$(_V_HEX_$(V))$(OBJCOPY) -O ihex $< $@
 
-applet0: $(BUILD_PATH)/flash.asmdump
-	node scripts/genapplet.js $< flash_write
+.PHONY: self
+self: $(SELF_UF2)
 
-applet1: $(BUILD_PATH)/utils.asmdump
-	node scripts/genapplet.js $< resetIntoApp
+src/selfdata.c: $(TARGET_BIN) scripts/gendata.py
+	$(_V_GEN_$(V))python2 scripts/gendata.py $(BOOTLOADER_SIZE) $(TARGET_BIN)
 
-drop-board: all
-	@echo "*** Copy files for $(BOARD)"
-	mkdir -p build/drop
-	rm -rf build/drop/$(BOARD)
-	mkdir -p build/drop/$(BOARD)
-	cp $(SELF_EXECUTABLE) build/drop/$(BOARD)/
-	cp $(EXECUTABLE) build/drop/$(BOARD)/
-	cp $(SELF_EXECUTABLE_INO) build/drop/$(BOARD)/
-	cp boards/$(BOARD)/board_config.h build/drop/$(BOARD)/
+$(SELF_ELF): $(SELF_OBJ) $(SELF_LDSCRIPT)
+	$(_V_LD_$(V))$(CC) $(LDFLAGS) -T$(SELF_LDSCRIPT) -o $@ $(SELF_OBJ)
 
-drop-pkg:
-	mv build/drop build/uf2-samd21-$(UF2_VERSION_BASE)
-	cp bin-README.md build/uf2-samd21-$(UF2_VERSION_BASE)/README.md
-	cd build; 7z a uf2-samd21-$(UF2_VERSION_BASE).zip uf2-samd21-$(UF2_VERSION_BASE)
-	rm -rf build/uf2-samd21-$(UF2_VERSION_BASE)
+$(SELF_BIN): $(SELF_ELF)
+	$(_V_BIN_$(V))$(OBJCOPY) -O binary $< $@
 
-all-boards:
-	for f in `cd boards; ls` ; do "$(MAKE)" BOARD=$$f drop-board || break; done
+$(SELF_UF2): $(SELF_BIN) ../scripts/uf2conv.py
+	$(_V_UF2_$(V))../scripts/uf2conv.py -b $(BOOTLOADER_SIZE) -f SAMD21 -c -o $@ $(SELF_BIN)
 
-drop: all-boards drop-pkg
+%.o: %.c
+	$(_V_CC_$(V))$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
 
-$(SUBMODULES):
-	git submodule update --init --recursive
+
+-include $(DEPS)

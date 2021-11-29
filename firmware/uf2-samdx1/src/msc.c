@@ -404,6 +404,9 @@ static bool udi_msc_cbw_validate(uint32_t alloc_len, uint8_t dir_flag) {
         udi_msc_csw_process();
         return false;
     }
+#else
+    (void)alloc_len;
+    (void)dir_flag;
 #endif
 
     /*

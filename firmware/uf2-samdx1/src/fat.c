@@ -126,7 +126,9 @@ static const FAT_BootBlock BootBlock = {
     .FilesystemIdentifier = "FAT16   ",
 };
 
-void padded_memcpy(char *dst, const char *src, int len) {
+void padded_memcpy(void *_dst, const void *_src, int len) {
+    char *dst = _dst;
+    const char *src = _src;
     for (int i = 0; i < len; ++i) {
         if (*src)
             *dst = *src++;
@@ -156,7 +158,7 @@ void read_block(uint32_t block_no, uint8_t *data) {
             // WARNING -- code presumes only one NULL .content for .UF2 file
             //            and all non-NULL .content fit in one sector
             //            and requires it be the last element of the array
-            for (int i = 1; i < NUM_FILES * 2 + 4; ++i) {
+            for (unsigned int i = 1; i < NUM_FILES * 2 + 4; ++i) {
                 data[i] = 0xff;
             }
         }
@@ -177,7 +179,7 @@ void read_block(uint32_t block_no, uint8_t *data) {
             DirEntry *d = (void *)data;
             padded_memcpy(d->name, BootBlock.VolumeLabel, 11);
             d->attrs = 0x28;
-            for (int i = 0; i < NUM_FILES; ++i) {
+            for (unsigned int i = 0; i < NUM_FILES; ++i) {
                 d++;
                 const struct TextFile *inf = &info[i];
                 d->size = inf->content ? strlen(inf->content) : UF2_SIZE;
@@ -214,6 +216,7 @@ void read_block(uint32_t block_no, uint8_t *data) {
 }
 
 void write_block(uint32_t block_no, uint8_t *data, bool quiet, WriteState *state) {
+    (void)block_no;
     UF2_Block *bl = (void *)data;
     if (!is_uf2_block(bl) || !UF2_IS_MY_FAMILY(bl)) {
         return;

@@ -12,3 +12,14 @@ TAGS
 **/.DS_STORE
 **/*.iml
 **/.idea
+
+.size_done
+*.o
+*.d
+*.bin
+*.elf
+*.hex
+*.map
+*.swp
+*.uf2
+src/selfdata.c

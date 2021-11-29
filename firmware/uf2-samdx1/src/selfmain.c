@@ -75,7 +75,7 @@ void setBootProt(int v) {
     logval("needed", v);
 
     // Don't write if nothing will be changed.
-    if (bootprot == v && !repair_fuses) {
+    if (bootprot == (uint32_t)v && !repair_fuses) {
         return;
     }
 
@@ -181,7 +181,7 @@ int main(void) {
 
     #ifdef SAMD21
     // Re-enable BOOTPROT
-    setBootProt(2); // 8k
+    //setBootProt(2); // 8k
     #endif
     // For the SAMD51, the boot protection will automatically be re-enabled on
     // reset.

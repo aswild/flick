@@ -600,7 +600,7 @@ uint32_t USB_ReadCore(void *pData, uint32_t length, uint32_t ep, PacketBuffer *c
     }
 
     if (cache->ptr < cache->size) {
-        packetSize = MIN(cache->size - cache->ptr, length);
+        packetSize = MIN((uint32_t)(cache->size - cache->ptr), length);
         if (pData) {
             memcpy(pData, cache->buf + cache->ptr, packetSize);
             cache->ptr += packetSize;
@@ -680,7 +680,7 @@ uint32_t USB_WriteCore(const void *pData, uint32_t length, uint8_t ep_num, bool 
         epdesc->DeviceDescBank[1].PCKSIZE.bit.AUTO_ZLP = false;
     }
     /* Check for requirement for multi-packet or auto zlp */
-    else if (length >= (1 << (epdesc->DeviceDescBank[1].PCKSIZE.bit.SIZE + 3))) {
+    else if (length >= (uint32_t)(1 << (epdesc->DeviceDescBank[1].PCKSIZE.bit.SIZE + 3))) {
         /* Update the EP data address */
         data_address = (uint32_t)pData;
         // data must be in RAM!
@@ -721,7 +721,7 @@ uint32_t USB_WriteCore(const void *pData, uint32_t length, uint8_t ep_num, bool 
 //* \brief Send zero length packet through the control endpoint
 //*----------------------------------------------------------------------------
 void AT91F_USB_SendZlp(void) {
-    uint8_t c;
+    uint8_t c = 0;
     USB_Write(&c, 0, 0);
 }
 

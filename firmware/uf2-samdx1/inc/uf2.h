@@ -33,10 +33,8 @@
 #endif
 
 #ifndef INDEX_URL
-#define INDEX_URL "https://www.pxt.io/"
+#define INDEX_URL "https://github.com/aswild/flick"
 #endif
-
-#include "uf2_version.h"
 
 // needs to be more than ~4200 (to force FAT16)
 #define NUM_FAT_BLOCKS 16000
@@ -54,9 +52,9 @@
 // Support the UART (real serial port, not USB)
 #define USE_UART 0
 // Support Human Interface Device (HID) - serial, flashing and debug
-#define USE_HID 1 // 788 bytes
+#define USE_HID 0 // 788 bytes
 // Expose HID via WebUSB
-#define USE_WEBUSB 1
+#define USE_WEBUSB 0
 // Doesn't yet disable code, just enumeration
 #define USE_MSC 1
 
@@ -75,7 +73,7 @@
 // Fine-tuning of features
 #define USE_HID_SERIAL 0   // just an example, not really needed; 36 bytes
 #define USE_HID_EXT 1      // extended HID commands (read/write mem); 60 bytes
-#define USE_HID_HANDOVER 1 // allow HID application->bootloader seamless transition; 56 bytes
+#define USE_HID_HANDOVER 0 // allow HID application->bootloader seamless transition; 56 bytes
 #define USE_MSC_HANDOVER 1 // ditto for MSC; 348 bytes
 #define USE_MSC_CHECKS 0   // check validity of MSC commands; 460 bytes
 #define USE_CDC_TERMINAL 0 // enable ASCII mode on CDC loop (not used by BOSSA); 228 bytes
@@ -234,7 +232,7 @@ typedef struct {
     uint8_t writtenMask[MAX_BLOCKS / 8 + 1];
 } WriteState;
 void write_block(uint32_t block_no, uint8_t *data, bool quiet, WriteState *state);
-void padded_memcpy(char *dst, const char *src, int len);
+void padded_memcpy(void *dst, const void *src, int len);
 
 // Last word in RAM
 // Unlike for ordinary applications, our link script doesn't place the stack at the bottom
@@ -246,7 +244,8 @@ void padded_memcpy(char *dst, const char *src, int len);
 #ifdef SAMD51
 #define DBL_TAP_PTR ((volatile uint32_t *)(HSRAM_ADDR + HSRAM_SIZE - 4))
 #endif
-#define DBL_TAP_MAGIC 0xf01669ef // Randomly selected, adjusted to have first and last bit set
+//#define DBL_TAP_MAGIC 0xf01669ef // Randomly selected, adjusted to have first and last bit set
+#define DBL_TAP_MAGIC 0x07738135 // Randomly selected, adjusted to have first and last bit set
 #define DBL_TAP_MAGIC_QUICK_BOOT 0xf02669ef
 
 #if USE_SINGLE_RESET

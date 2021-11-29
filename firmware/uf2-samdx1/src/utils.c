@@ -13,7 +13,7 @@ void delay(uint32_t ms) {
 #ifdef SAMD51
     ms <<= 12;
 #endif
-    for (int i = 1; i < ms; ++i) {
+    for (uint32_t i = 1; i < ms; ++i) {
         asm("nop");
     }
 }
@@ -30,6 +30,7 @@ void timerTick(void) {
 }
 
 void panic(int code) {
+    (void)code;
     logval("PANIC", code);
     while (1) {
     }
@@ -214,5 +215,7 @@ void RGBLED_set_color(uint32_t color) {
     }
 #endif
     neopixel_send_buffer(buf, BOARD_NEOPIXEL_COUNT * 3);
+#else
+    (void)color;
 #endif
 }

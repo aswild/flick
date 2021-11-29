@@ -43,6 +43,8 @@ void sam_ba_monitor_init(uint8_t com_interface) {
     if (com_interface == SAM_BA_INTERFACE_USART) {
         b_sam_ba_interface_usart = true;
     }
+#else
+    (void)com_interface;
 #endif
 }
 
