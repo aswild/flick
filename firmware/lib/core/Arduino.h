@@ -112,4 +112,7 @@ extern void analogOutputInit( void ) ;
 // ARM toolchain doesn't provide itoa etc, provide them
 #include "api/itoa.h"
 
+// always make pinPeripheral available
+#include "wiring_private.h"
+
 #endif // Arduino_h
