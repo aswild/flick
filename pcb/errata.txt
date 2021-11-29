@@ -1,0 +1,43 @@
+------------------------------------------------------------------------
+|                     Flick PCB Errata                                 |
+------------------------------------------------------------------------
+
+Rev A
+-----
+
+Summary:
+  1) Swap pins 1/3 on both potentiometers
+  2) Switch LED_TRIG to a diffused LED and increase its resistor significantly
+  3) Use longer pads on U1, X1, and X2
+  4) Move X1 (USB) as close to board edge as possible
+
+1)
+Both potentiometers (VR1, VR2) are wired backwards. CC/CCW is opposite of what
+you'd expect. Bodge: lift pins 1 and 3 and use wires to cross-connect them.
+
+2a)
+The current limiting resistor for LED_TRIG (R3) is too small. 330ohm with a 2.6V
+drop results in 2.1mA which is close enough to the datasheet's spec of 2mA, but
+that's incredibly bright. Using software to PWM the LED at 10% (or even less)
+looks much better. Bodge: replace R3 with a larger resistor. A 2.2k I had laying
+around seems much better.
+
+2b)
+Using a clear LED for LED_TRIG was probably also not the best idea. Even with
+the lower current it's still blinding when looking straight on. I should switch
+to a diffused LED next time.
+
+3)
+It'll be worth the time making "hand soldering" versions of the 0.5mm pitch
+connectors' footprints. USB and the FFC were really tricky because the leads are
+so tiny, and longer pads would help. The TQFP wasn't so bad because of big leads
+on the part itself, but longer pads would still be nice.
+Also the corner mounting pads for the FFC connector were too small to properly
+get solder in there.
+
+4)
+The USB connector should be moved closer to the board edge. From the footprint,
+it seemed like the connector would overhang the board edge somewhat, but in reality
+it's pretty much flush with the board edge (totally by chance). More overhang makes
+enclosure design easier, so get those mounting holes as close to the edge as
+fab drill rules will allow.
