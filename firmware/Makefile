@@ -76,9 +76,11 @@ BOSSAC      ?= bossac
 BOSSAC_FLAGS = --erase --write --verify --reset --usb-port --port=$(COMPORT)
 OS          := $(shell uname -s)
 ifeq ($(OS),Linux)
-RESET_SCRIPT = scripts/reset-arduino-linux.sh -q $(COMPORT)
+RESET_SCRIPT = scripts/reset-arduino-linux.sh
+UF2_DRIVE_PATH = /run/media/$(USER)/FLICK
 else
-RESET_SCRIPT = scripts/ard-reset-arduino --zero $(COMPORT)
+RESET_SCRIPT = scripts/ard-reset-arduino --zero
+UF2_DRIVE_PATH = /fix/me/not/yet/implemented
 endif
 
 # my bossa-git AUR package sets the version to the Arch pkgver, which is 1.8.rXX.gYYYYYYY since
@@ -218,6 +220,7 @@ CORE_OBJ := $(filter-out $(SYS_OBJ),$(CORE_OBJ))
 TARGET_ELF  = $(OBJDIR)/$(TARGET).elf
 TARGET_BIN  = $(OBJDIR)/$(TARGET).bin
 TARGET_HEX  = $(OBJDIR)/$(TARGET).hex
+TARGET_UF2  = $(OBJDIR)/$(TARGET).uf2
 
 V ?= 0
 _V_CC_0        = @echo "  CC      " $<;
@@ -227,6 +230,7 @@ _V_LD_0        = @echo "  LD      " $@;
 _V_AR_0        = @echo "  AR      " $@;
 _V_BIN_0       = @echo "  BIN     " $@;
 _V_HEX_0       = @echo "  HEX     " $@;
+_V_UF2_0       = @echo "  UF2     " $@;
 _V_SIZE_0      = @echo "Program Size:";
 _V_RESET_0     = @echo "  RESET   " $(COMPORT);
 _V_UPLOAD_0    = @echo "  UPLOAD  " $<;
@@ -238,7 +242,7 @@ vpath %.cpp $(SKETCH) $(CORESRCDIRS)
 vpath %.S   $(SKETCH) $(CORESRCDIRS)
 
 .PHONY: all
-all: $(TARGET_BIN) .size_done
+all: $(TARGET_BIN) $(TARGET_UF2) .size_done
 
 SIZE_CMD = $(_V_SIZE_$(V))scripts/print-size.py -q $(TARGET_ELF)
 .PHONY: size
@@ -251,8 +255,13 @@ size: $(TARGET_ELF) | $(TARGET_BIN)
 
 .PHONY: upload
 upload: $(TARGET_BIN) all
-	$(_V_RESET_$(V))$(RESET_SCRIPT)
+	$(_V_RESET_$(V))$(RESET_SCRIPT) $(COMPORT)
 	$(_V_UPLOAD_$(V))$(BOSSAC) $(BOSSAC_FLAGS) $<
+
+.PHONY: uploaduf2
+uploaduf2: $(TARGET_UF2) all
+	$(_V_RESET_$(V))$(RESET_SCRIPT) -u $(UF2_DRIVE_PATH) $(COMPORT)
+	$(_V_UPLOAD_$(V))cp $(TARGET_UF2) $(UF2_DRIVE_PATH)/
 
 .PHONY: clean
 clean:
@@ -293,6 +302,9 @@ $(TARGET_ELF): $(TARGET_OBJ) $(SYS_OBJ) $(CORELIB) $(LDSCRIPT)
 
 $(TARGET_BIN): $(TARGET_ELF)
 	$(_V_BIN_$(V))$(OBJCOPY) -O binary $< $@
+
+$(TARGET_UF2): $(TARGET_BIN) scripts/uf2conv.py
+	$(_V_UF2_$(V))scripts/uf2conv.py -b 0x2000 -f SAMD21 -c -o $@ $(TARGET_BIN)
 
 $(TARGET_HEX): $(TARGET_ELF)
 	$(_V_HEX_$(V))$(OBJCOPY) -O ihex $< $@

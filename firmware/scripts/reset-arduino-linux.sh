@@ -1,21 +1,22 @@
 #!/bin/bash
 
 msg() {
-	if [[ $quiet != y ]]; then
-		echo "$*"
-	fi
+    if [[ $quiet != y ]]; then
+        echo "$*"
+    fi
 }
 
 die() {
-	echo "$*" >&2
-	exit 1
+    echo "$*" >&2
+    exit 1
 }
 
-while getopts "q" opt; do
-	case $opt in
-		q)  quiet=y ;;
-		\?) die "Invalid option" ;;
-	esac
+while getopts "qu:" opt; do
+    case $opt in
+        q)  quiet=y ;;
+        u)  uf2_path="$OPTARG" ;;
+        \?) die "Invalid option" ;;
+    esac
 done
 shift $(($OPTIND - 1))
 
@@ -42,4 +43,14 @@ stty -F $DEVICE 1200
 set +x
 while [[ -r $DEVICE ]]; do : ; done
 while [[ ! -r $DEVICE ]]; do : ; done
+
+if [[ -n "$uf2_path" ]]; then
+    msg "waiting for '$uf2_path' to be mounted"
+    retries=5
+    while [[ ! -d "$uf2_path" && $retries > 0 ]]; do
+        ((retries--))
+        sleep 1
+    done
+fi
+
 exit 0
