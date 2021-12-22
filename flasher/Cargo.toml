@@ -1,0 +1,15 @@
+[package]
+name = "flick-flasher"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+pixels = "0.8"
+winit = "0.26"
+
+env_logger = { version = "0.9", optional = true }
+log = { version = "0.4", optional = true }
+
+[features]
+default = []
+logger = ["log", "env_logger"]
