@@ -246,51 +246,6 @@ impl State {
         Self { bg_color, fg_color, active: false }
     }
 
-    /* Fancy unsafe code isn't needed when we can just scale down the framebuffer instead.
-    pub fn draw_rgba8_fast(&self, frame: &mut [u8]) {
-        // We want to treat frame as a u32 slice because [u32].fill() optimizes really well with
-        // a bunch of loop unrolling, which [u8].chunks_exact_mut() doesn't. Verify that frame is
-        // properly aligned and sized, then cast it to a &mut [u32] and call fill.
-        use std::mem::{align_of, size_of};
-
-        // Check alignment manually, because we only care if it's aligned and don't need extra
-        // logic of finding what would be necessary to align the pointer. If misaligned at all we
-        // fall back to the slow impl. usize is equivalent to uintptr_t, guaranteed that it can
-        // hold a pointer.
-        let ptr = frame.as_mut_ptr() as usize;
-        if (ptr % align_of::<u32>() != 0) || (frame.len() % size_of::<u32>() != 0) {
-            return self.draw_rgba8_slowpath(frame);
-        }
-
-        // SAFETY:
-        //   * frame is a mut slice, so it's guaranteed to be non-null, initialized, and a single
-        //     allocated object
-        //   * we verified that frame's pointer is aligned
-        //   * we verified that frame's length is an exact multiple of sizeof(u32)
-        //   * all bit patterns are valid for both u8 and u32
-        let frame_u32: &mut [u32] = unsafe {
-            std::slice::from_raw_parts_mut(
-                frame.as_mut_ptr() as *mut u32,
-                frame.len() / size_of::<u32>(),
-            )
-        };
-
-        // frame_u32 now points to the same memory as frame. Drop frame so we can be sure it can't
-        // be re-used which would cause a mutable alias.
-        drop(frame);
-
-        // finally, fill the u32 slice with our desired color. LLVM vectorizes and unrolls this
-        // loop a lot.
-        //let color = if self.active { self.fg_color.as_u32() } else { self.bg_color.as_u32() };
-        //let color = color.to_be();
-        let color_bytes =
-            if self.active { self.fg_color.as_bytes() } else { self.bg_color.as_bytes() };
-        let color = u32::from_ne_bytes(color_bytes);
-
-        frame_u32.fill(color);
-    }
-    */
-
     /// Draw the state to the frame buffer.
     ///
     /// Assumes the default texture format: `wgpu::TextureFormat::Rgba8UnormSrgb`.
