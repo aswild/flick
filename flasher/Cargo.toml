@@ -6,5 +6,6 @@ edition = "2021"
 [dependencies]
 anyhow = "1"
 clap = { version = "3", features = ["cargo", "derive"] }
+env_logger = "0.9"
 pixels = "0.9"
 winit = "0.26"

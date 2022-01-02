@@ -100,6 +100,7 @@ struct Args {
 /// Basically everything happens in main(). Not the prettiest, but it's the easiest to write
 /// because of how winit's event loop works.
 fn run() -> Result<()> {
+    env_logger::init();
     let args = Args::parse();
 
     // setup the winit event loop and window
