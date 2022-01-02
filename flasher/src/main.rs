@@ -23,6 +23,7 @@ use std::time::{Duration, Instant};
 use anyhow::{Context, Result};
 use clap::{AppSettings, Parser};
 use pixels::{PixelsBuilder, SurfaceTexture};
+use wgpu::{PowerPreference, RequestAdapterOptions};
 use winit::dpi::LogicalSize;
 use winit::event::{ElementState, Event, VirtualKeyCode, WindowEvent};
 use winit::event_loop::{ControlFlow, EventLoop};
@@ -122,7 +123,18 @@ fn run() -> Result<()> {
         let surface_texture = SurfaceTexture::new(window_size.width, window_size.height, &window);
         let (px_width, px_height) = scale_by_gcd(window_size.width, window_size.height);
         PixelsBuilder::new(px_width, px_height, surface_texture)
-            .enable_vsync(args.vsync) // this is passed on to wgpu
+            // This is passed on to wgpu as PresentMode::Fifo for vsync and Immediate for no-vsync.
+            // Based on render times, it seems like Immediate mode might not be working on my
+            // windows desktop.
+            .enable_vsync(args.vsync)
+            // hack: on my desktop, wgpu wants to pick integrated graphics by default rather than
+            // my actual GPU. I'm not entirely sure why, but this makes it properly use the real
+            // GPU adapter.
+            .request_adapter_options(RequestAdapterOptions {
+                power_preference: PowerPreference::HighPerformance,
+                force_fallback_adapter: false,
+                compatible_surface: None,
+            })
             .build()
             .context("Failed to initialize Pixels framebuffer")?
     };
